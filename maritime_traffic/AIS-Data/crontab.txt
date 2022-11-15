@@ -1,0 +1,1 @@
+*/15 * * * * java -cp "AIS-1.0-SNAPSHOT.jar:libs/*" it.ais.ProcessPipeline > ../AIS.log 2>&1

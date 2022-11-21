@@ -1,0 +1,87 @@
+Tipo.Navio;Tipo.Navio.En;CODE
+Abastecedor ao largo;offshore supplier;42
+Batelão sem propulsão de convés;Barge without deck propulsion;34
+Carga Geral;General Load;33
+Carga Geral / Contentores;General Cargo / Containers;33
+Carga Geral multi deck;Multi-deck General Load;33
+Carga Geral single deck;Single deck General Load;33
+Cruzeiro;cruise;0
+Cruzeiros;cruises;35
+CRUZEIROS;CRUISES;36
+Draga;Dredge;49
+Embarcação à vela com um motor auxiliar;Sailing vessel with an auxiliary engine;0
+Embarcação à vela de treino;Training sailing vessel;0
+EMBARCAÇÕES DE PESCA;FISHING VESSELS;41
+EMBARCAÇÃO DE RECREIO;RECREATION VESSEL;49
+Estrutura flutuante submersível, utilizada como doca;Submersible floating structure, used as a dock;0
+Frigorífico;refrigerator;33
+Graneleiro;bulk carrier;20
+Graneleiro / Cereais;Bulk Carrier / Cereals;20
+Graneleiro / Petroleiro;Bulk Carrier / Oil Tanker;10
+Guerra;War;0
+Investigação / Exploração;Investigation / Exploration;49
+Misto - Carga geral / Contentores;Mixed - General Cargo / Containers;33
+Misto - Carga geral / Passageiros;Mixed - General cargo / Passengers;33
+Não Discriminado;non-discriminatory;49
+"Navio com rampa para cargas do tipo ""roll-on/roll-off"" (veículos)";"Ship with ramp for ""roll-on/roll-off"" cargo (vehicles)";33
+Navio com rampa para cargas do tipo roll-on/roll-off (veículos);Ship with ramp for roll-on/roll-off cargo (vehicles);33
+Navio de assistência;assistance ship;0
+Navio de assistencia no trabalho;Assistance ship at work;0
+Navio de carga e passageiros;Cargo and passenger ship;0
+Navio de despejo de rocha;rock dump ship;0
+Navio de exploração científica;Scientific exploration ship;0
+Navio de Guerra;War ship;0
+Navio de passageiros (para mais de 12 passageiros);Passenger ship (for more than 12 passengers);0
+Navio de patrulha, guarda e segurança;Patrol ship, guard and security;0
+Navio de pesca;fishing vessel;0
+Navio de pesquisa pesqueira;fishing research vessel;0
+Navio de providencia de bens ;Ship providing goods;0
+Navio de recolha de lamas e/ou areia;Sludge and/or sand collection vessel;0
+Navio de recriação;Recreation ship;0
+Navio de recriação com mais de 20 metros;Recreation ship over 20 meters;0
+Navio de recriação, não especificado de outra forma;Recreation ship, not otherwise specified;0
+Navio de salvamento;rescue ship;0
+Navio de transporte de pilotos para navios ;Ship transporting pilots to ships;0
+Navio exclusivamente equipado com tanques de carga;Ship exclusively equipped with cargo tanks;10
+Navio Guerra;war ship;0
+Navio impulsionado maioritariamente por velas, para passageiros;Ship propelled mostly by sails, for passengers;0
+Navio não especificado de alto mar;Unspecified deep sea vessel;0
+Navio para carregamentos de cimento;Ship for cement shipments;52
+Navio para carregar produtos quimicos a granel ou em tanques;Ship to load chemicals in bulk or in tanks;10
+Navio para carregar veículos automóveis ou peças de automóveis;Ship to load automobiles or auto parts;33
+"Navio para contentores e cargas do tipo ""roll-on/roll-of";Ship for containers and roll-on/roll-of cargo;33
+Navio para escalar dois ou mais portos;Ship to call at two or more ports;0
+Navio para transporte pecuário;Vessel for livestock transport;33
+Navio rebocador ;tug ship;0
+Navio rebocador de outros navios;Tugboat for other ships;0
+Navios para carregar carga com temperatura controlada;Ships to carry cargo with controlled temperature;33
+Passageiros não discriminado;Passengers not discriminated against;35
+Petroleiro de transporte de gás natural liquefeito (LNG) e de gás liquefeito de petroleo (LPG);Oil transport tanker for liquefied natural gas (LNG) and liquefied petroleum gas (LPG);10
+Petroleiro para carregamento de crude;Oil tanke;10
+Petroleiro para transporte de óleo vegetal;Tanker for transporting vegetable oil;10
+Petroleiro para transporte de óleos e derivados;Tanker for transporting oil and derivatives;10
+Petroleiro para transporte de betume e asfalto;Oil tanker for transporting bitumen and asphalt;10
+Porta-contentores;container ship;31
+Porta-Contentores;Container Carriers;31
+Qualquer estrutura flutuante;Any floating structure;0
+Rebocador;Tug;43
+Ro-Ro não discriminado;Ro-Ro not broken down;33
+Ro-Ro/Contentores;Ro-Ro/Containers;33
+Sondagem / Exploração ao largo;Drilling / Offshore Exploration;42
+Submersíveis / Plataformas / Estruturas Diversas;Submersibles / Platforms / Various Structure;0
+Tanque / Gás Petróleo Liquefeito (LPG);Tank / Liquefied Petroleum Gas (LPG);10
+Tanque / Químico (alto mar);Tank / Chemical (high seas);10
+Tanque Gás Liquefeito;Liquefied Gas Tank;10
+Tanque não discriminado;Tank not broken down;10
+Tanque Petroleiro;Oil tank;10
+Tanque Químico;Chemical Tank;10
+Transporte de Gado;Cattle transport;32
+Transporte de Veículos;Vehicle Transport;32
+Transporte Especializado não discriminado;Non-discriminatory Specialized Transport;32
+Vessel designed to lay cable.;Vessel designed to lay cable.;0
+Vessel designed to tow objects but sailing alone.;Vessel designed to tow objects but sailing alone.;0
+Batelão sem propulsão de carga seca n.d.;Barge without dry cargo propulsion n.d.;34
+Ro-Ro/Passageiros;Ro-Ro/Passengers;33
+Ro-Ro/Passageiros;Ro-Ro/Passengers;33
+Graneleiro Químico;Chemical Bulk Carrier;32
+Batelão sem propulsão porta barcaças;Barge without propulsion barge;34

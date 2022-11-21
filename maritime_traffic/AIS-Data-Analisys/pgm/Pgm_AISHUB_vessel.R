@@ -10,12 +10,13 @@ library(rgdal)
 #-------------------------------------------
 # Read input data
 #------------------------------------------
-#path data 
-setwd("C:\\trasporti\\Dati\\out_final\\data")
+#path data to change 
+setwd("inpur_data")
 
 #AISHUB data 30Aug2022 - 20nov2022
+
 data_AH_LISBOA_2022=
-  as.data.frame(read_xlsx("AISHUB_LISBONA.xlsx"))
+read.csv2("AISHUB_LISBONA.csv")
 
 #Data vessels info from Vessel Finder and metadata code on ship type (AISHUB data)
 
@@ -68,7 +69,7 @@ data_AH_LISBOA_2022=data_AH_LISBOA_2022%>%
          Length = A + B,Width = C + D,
          month=month(TSTAMP),day=day(TSTAMP),
          NAVSTAT2=ifelse(NAVSTAT %in% c(1,4,5),1,0),
-         CODE=if_else((TYPE>'69' & TYPE<'90'),TYPE,"0","0"))%>%
+         CODE=ifelse((TYPE>69 & TYPE<90),TYPE,"0"))%>%
    filter(CODE>'0')
 
 data_AH_LISBOA_2022 <-data_AH_LISBOA_2022[order(data_AH_LISBOA_2022$MMSI, data_AH_LISBOA_2022$TSTAMP),]

@@ -4,8 +4,9 @@ library(TSstudio)
 library(tidyverse)
 library(readxl)
 library(dbplyr)
-#path data 
-setwd("C:\\trasporti\\Dati\\out_final\\data")
+
+#path data to change
+setwd("inpur_data")
 
 #Port of Lisbon data Arrival and Departure of vessels from 2014-2022.
 

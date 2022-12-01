@@ -1,4 +1,4 @@
-Creating grid and run OTP:
+# Creating grid and run OTP:
 
 grid_2 <- expand.grid(seq(bounding_box[1], bounding_box[3], by = 0.02),
                     seq(bounding_box[2], bounding_box[4], by = 0.02)) %>%
@@ -25,7 +25,7 @@ dest_matrixt_tib <- as_tibble(dest_matrix) %>%
   rename(end_id = id)
 
 
-Expected travel time:
+# Expected travel time:
 
 # create empty lists to store results
 list_results_org_dest_car <- list()
@@ -122,7 +122,7 @@ org_dest_car <- do.call("rbind", list_results_org_dest_car)
 
 
 
-Number of people served by each point of the grid:
+# Number of people served by each point of the grid:
 
 # compute voronos
 my_vor_2 <- st_as_sf(terra::voronoi(terra::vect(grid_2))) %>% 
@@ -159,7 +159,7 @@ org_dest_PS_car_formatted %>%
 
 
 
-For each starting point (order from most to least densely populated) the distribution of travel time to all the other points:
+# For each starting point (order from most to least densely populated) the distribution of travel time to all the other points:
 
 library(ggridges)
 

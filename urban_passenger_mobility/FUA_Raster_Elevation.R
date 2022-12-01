@@ -1,4 +1,4 @@
-Functunal urban areas:
+# Functunal urban areas:
 
 FUA_shape_file <- read_sf(path_to_shape_file, layer= name_layer) 
 city_shape_file <- FUA_shape_file %>%
@@ -10,7 +10,7 @@ city_shape_file %>%
   kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
 
 
-Crop Raster Data:
+# Crop Raster Data:
 
 population_data_path <- "data/nld_ppp_2020_UNadj_constrained.tif"
 population_data      <- terra::rast(population_data_path)
@@ -22,7 +22,7 @@ mapview::mapview(population_data_city_brick, alpha.regions = 0.5 )
 
 
 
-Elevation:
+# Elevation:
 
 elevation <- elevatr::get_elev_raster(city_shape_file,
                                       z = 12)

@@ -1,0 +1,365 @@
+# Reachability Statistics
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+library(webshot)
+
+library(sf)
+library(dplyr)
+library(glue)
+library(gtfstools)
+library(tidyverse)
+library(lubridate)
+library(colorspace)
+library(terra)
+library(opentripplanner) 
+library(gtfs2gps)
+library(elevatr)
+library(terra)
+library(stringi)
+library(openrouteservice)
+library(sf)
+```
+
+
+## Introduction
+
+The actual accessibility of a bus stop does not mean that this bus stop is useful. Only if public transport can be used to reach destinations within a reasonable time, can we consider the stop useful. One way of expressing this would be to check how many stops can be reached from a given stop. However, in the method explained below this use-cases shows a grid-based system. For every point it in the grid I compute different isochones and see which percentage of the population can be reached for different travel durations. For each stop, I compute 24 different isochrones from 5 minutes to 2 hours with a 5 minute interval in between.
+
+
+## Create Grid
+
+First, lets create a full grid in which points are 0.005 point longitude and 0.005 latitude apart within the FUA.
+
+
+```{r, eval=F}
+bounding_box <- st_bbox(city_shape_file) 
+
+grid <- expand.grid(seq(bounding_box[1], bounding_box[3], by = grid_size),
+                    seq(bounding_box[2], bounding_box[4], by = grid_size)) %>%
+  as_tibble() %>%
+  mutate(id = 1:n()) %>%
+  relocate(id) %>%
+  setNames(c("id", "lon","lat")) %>%
+  st_as_sf(coords = c("lon", "lat")) %>%
+  st_set_crs(st_crs("+proj=longlat")) %>%
+  mutate(point_in = as.numeric(st_intersects(., city_shape_file))) %>%
+  filter(!is.na(point_in))%>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2])
+
+
+ggplot()+
+  geom_sf(data = city_shape_file, fill = "red", alpha = .5) +
+  geom_sf(data = grid, fill = "white", col = "white", size = .2, alpha = .5)+
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black", colour = "black"),
+        title = element_text(hjust=1, colour="white", size = 8),
+        axis.title.x = element_blank())
+
+```
+
+
+
+```{r,echo=FALSE, fig.cap = 'Grid of all 2,188 points in the Hague FUA. These points can be used to compute what percentage of the city can be reached within a given amount of time',out.width="100%"}
+knitr::include_graphics("images/subset_shape_p3.png")
+```
+
+The map below shows an example isochrone map with the different isochrone shapefiles that can be reached within a certain travel time using public transport and walking, starting from the national parliament in the Netherlands.
+
+```{r, echo= FALSE, out.width="100%", out.height="500px"}
+complete_isochone <- readRDS("large_file_storage/example_complete_isochone.rds")
+test_point <- readRDS("large_file_storage/example_test_point.rds")
+
+my_colours <- colorRampPalette(c("maroon","blue",  "yellow", "grey90"))
+
+mapview::mapview(complete_isochone,  zcol   = "minutes",   
+                 layer.name  = "travel time in minutes",
+                 col.regions = my_colours,
+                 alpha.regions = 0.15) +
+  mapview::mapview(test_point,
+                   col.regions ="red",
+                   cex =2,
+                   layer.name  = "starting point",
+                   alpha.regions = 1)
+```
+
+This just shows the isochrones for a single point, instead of all 2,188 points of the grid. To compute the percentage of the population reached, I first compute the total population of an FUA.
+
+
+```{r, eval=F}
+total_pop <-  sum(as.matrix(terra::mask(population_data_city, vect(city_shape_file))),  na.rm = TRUE)
+total_pop
+```
+
+
+```{r, eval=F}
+1092102
+```
+
+Then I need a custom function to compute the population reached for a given isochrone. Later we loop over the different isochrones
+
+
+```{r}
+get_percentage_function <- function(y,
+                                    data = complete_isochone,
+                                    cur_total_pop = total_pop,
+                                    cur_population_data_city = population_data_city){
+  
+  cur_isochone <-  data %>% slice(y)
+  percent_population_reached <- sum(as.matrix(terra::mask(cur_population_data_city, vect(cur_isochone)) ), 
+                                    na.rm = TRUE) / cur_total_pop
+  
+  area <- st_area(cur_isochone)
+  output <- tibble(percent_population_reached = percent_population_reached,
+                   time = cur_isochone$time,
+                   area = area)
+  output
+}
+```
+
+
+With this in place, we can now loop over all points in the grid, compute 24 isochrones for all points and compute for all these isochrones what percentage of the population is reached. For this I use  `otp_isochrone()` function from the `opentripplanner` package.^[https://docs.ropensci.org/opentripplanner/]This package is the R interface of OpenTriopPlanner on a 2017 Dell XPS laptop with 16gb of ram and an i7-7700HQ processor, this takes around 1.5 hours. Therefore, the results are saved after the code has finished running.
+
+```{r, eval = FALSE}
+# create empty list to store results
+list_results <- list()
+
+# loop over rows in grid
+for (i in 1:nrow(grid)) {
+  tryCatch({
+    
+#only look at one point at a time
+    test_point <- grid %>%
+      slice(i)
+    
+# select current point data    
+    id <- test_point$id
+    
+    cur_lon <- test_point$lon
+    cur_lat <- test_point$lat
+    
+# compute 24 isochrones per point
+    complete_isochone <- otp_isochrone(
+      otpcon = otpcon,
+      fromPlace = c(cur_lon, cur_lat),
+      mode = c("WALK", "TRANSIT"),
+      maxWalkDistance = max_walking_distance,
+      date_time = date_and_time,
+      cutoffSec = seq(5, 120, 5) * 60
+    )
+    
+# use the custom get_percentage_function function 
+# to estimate which percentage of the FUA can be
+# reached and bind all the results
+    output2 <-
+      data.table::rbindlist(
+        lapply(1:nrow(complete_isochone), 
+               FUN = get_percentage_function)
+        ) %>%
+      as_tibble() %>%
+      mutate(id = id,
+             cur_lon,
+             cur_lat)
+    
+# store the results in a list
+    list_results[[i]] <- output2
+    print(paste0(i, " of ", nrow(grid)))
+  },
+  error = function(e) {
+    cat("ERROR :", conditionMessage(e), "\n")
+  })
+}
+
+
+# save a ll the results
+population_reached_data <- data.table::rbindlist(list_results)%>% 
+  as_tibble()
+
+write_csv(population_reached_data,output_population_reached)
+```
+
+
+The results of this process now look like this:
+
+```{r, message=FALSE, warning=FALSE}
+population_reached_data <- read_csv(output_population_reached)
+
+population_reached_data %>% 
+  arrange(id, time) %>% 
+  mutate(percent_population_reached = round(percent_population_reached *100,2)) %>% 
+  head(30) %>% 
+  kableExtra::kable() %>% 
+  kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+With these results, we can compute per time (in seconds) how much of the population can be reached on average. However, before doing so, it makes sense to create weights for the different grid points. Not every point is necessarily equally relevant. A grid point in a location with a low population density should have a lower weight than a grid point in the highest population density area. One way to create such population weights is to draw a  [voronoi](https://en.wikipedia.org/wiki/Voronoi_diagram) plot of all the grid points and use again the population data to estimate the sum population density within the voronoi and finally assign this sum to the point at the center of the voronoi cells. The map below shows how this looks
+
+
+```{r, eval = FALSE}
+my_vor <- st_as_sf(terra::voronoi(terra::vect(grid))) %>% 
+  st_intersection(city_shape_file)
+
+
+population_data_city_brick <- raster::brick(population_data_city)
+my_vor$pop <- as.numeric(extract(population_data_city_brick,my_vor,fun=sum, na.rm =TRUE))
+
+mapview::mapview(my_vor, 
+                 alpha.regions = 0.5, 
+                 zcol = "pop", 
+                 layer.name = "sum population per cell") +
+  mapview::mapview(grid,  
+                   col.regions ="black",
+                   cex = 1,
+                   layer.name = "grid points",
+                   alpha.regions = 1)
+```
+
+```{r, echo= FALSE, out.width="100%", out.height="500px"}
+my_vor <- readRDS("large_file_storage/my_vor.rds")
+#write_rds(grid, "large_file_storage/grid.rds")
+grid <- readRDS("large_file_storage/grid.rds")
+
+mapview::mapview(my_vor, alpha.regions = 0.5, 
+                 zcol = "pop", 
+                 layer.name = "sum population per cell") +
+  mapview::mapview(grid,  
+                   col.regions ="black",
+                   cex = 1,
+                   layer.name = "grid points",
+                   alpha.regions = 1)
+```
+
+
+After calculating the population per voronoi cell and assigning this as a weight per grid cell, we can compute the mean, the median and the weighted mean for each time. These results can then be plotted with the time on the x-axis and percentages on the y-axis. The solid colours indicate the statistics and the thinner grey lines show the stats per grid point.
+
+
+
+
+```{r, warning= FALSE, message=FALSE,out.width="100%", fig.retina = TRUE, fig.cap = 'average population that can be reached using public transport for different travel times'}
+population_reached_data_pop <- population_reached_data %>% 
+  left_join(my_vor %>% 
+              select(id, pop) %>% 
+              st_drop_geometry(),
+             by = "id") 
+
+pop_reached_summaries <- population_reached_data_pop%>% 
+  group_by(time  ) %>% 
+  summarise(mean = mean(percent_population_reached),
+            median = median(percent_population_reached),
+            weighted_mean = weighted.mean(percent_population_reached, w = pop)) %>% 
+  pivot_longer(cols = -c(time))
+
+
+ggplot() +
+  geom_line(data =population_reached_data_pop, 
+            aes(x = time/60, y = percent_population_reached, group = id ), 
+            alpha =.1) +
+  geom_line(data = pop_reached_summaries, 
+            aes(x = time/60, y = value, col = name ),
+            inherit.aes = FALSE,
+            alpha = .9,
+            size = 3) +
+  ggthemes::scale_color_tableau() +
+  theme_minimal()+
+  scale_y_continuous(labels = scales::percent)+
+  labs(y = "percent population reached",
+       x = "travel time in minutes",
+       col = NULL) +
+  theme(legend.position = "bottom")
+
+```
+
+In table format these statistics would look like this:
+
+```{r}
+  pop_reached_summaries %>% 
+    mutate(value = paste0(format(round(value*100, 2), nsmall = 1), "%")) %>% 
+    pivot_wider(names_from = name, values_from = value) %>% 
+    mutate(time = time/60) %>% 
+    mutate(time = sub(":\\d{2}", "", chron::times((time%/%60 +  time%%60 /3600)/24))) %>% 
+    kableExtra::kable() %>% 
+    kableExtra::kable_styling(bootstrap_options = c("striped", "hover"))
+```
+
+This way we can derive that on average inhabitants of The Hague can reach 13.1% of the rest of the population using public transport within 30 minutes and 55.1% within an hour on Tuesday, May 17th 2022 at 8.30 am. Two points are important to note here. The time and the day you pick to do this analysis will influence the results (in the middle of the night the percentage will be lower) and the maximum walking distance affects the results. The higher the maximum walking distance the more of the city becomes accessible. In the extreme case, people could just walk everywhere and not use public transport at all.
+
+
+Two issues are apparent from this plot. First, there is large variation in accessibility per point. Secondly, the weighted mean is consistently higher than the non-weighted mean, meaning that more densely populated areas can access more of FUA population using public transport than lower populated areas. This effect can be made even clearer by splitting the plot into 9 facets where each subplot consists only of the points that form groups with (approximately) equal numbers of observations from the lowest to the highest population density.
+
+
+```{r, warning= FALSE, message=FALSE,out.width="100%", fig.retina = TRUE, fig.cap = 'average population that can be reached using public transport for different travel times per population density of origin'}
+# to make the labels more human readable we can use this function
+# taken from https://stackoverflow.com/questions/28159936/format-numbers-with-million-m-and-billion-b-suffixes
+format_bignum <- function(n) {
+  dplyr::case_when(
+    n >= 1e12 ~ paste0(round(n / 1e12, 1), 'Tn'),
+    n >= 1e9 ~ paste0(round(n / 1e9, 1), 'Bn'),
+    n >= 1e6 ~ paste0(round(n / 1e6, 1), 'M'), 
+    n >= 1e3 ~ paste0(round(n / 1e3, 1), 'K'),
+    TRUE ~ as.character(round(n, 0))
+  )
+}
+
+
+
+# taken from https://stackoverflow.com/questions/32356108/output-a-numeric-value-from-cut-in-r
+cut_borders <- function(x){
+  pattern <- "(\\(|\\[)(-*[0-9]+\\.*[0-9]*),(-*[0-9]+\\.*[0-9]*)(\\)|\\])"
+  start <- as.numeric(gsub(pattern,"\\2", x))
+  end <- as.numeric(gsub(pattern,"\\3", x))
+  data.frame(start, end)
+}
+
+
+population_reached_data_pop2 <- population_reached_data %>% 
+  left_join(my_vor %>% select(id, pop) %>% st_drop_geometry()) %>% 
+  mutate(qn = cut_number(pop, 9,           
+                         ordered_result = T,
+                         dig.lab = 50)) %>% 
+  mutate(start = cut_borders(qn)[, 1],
+         end = cut_borders(qn)[, 2]) %>%
+  mutate(end = format_bignum(end),
+         start = format_bignum(start)) %>%
+  mutate(my_label = paste0(
+    stri_sub(
+      as.character(qn),
+      from = 1,
+      to = 1
+    ),
+    start,
+    ",",
+    end,
+    stri_sub(
+      as.character(qn),
+      from = -1,
+      to = -1
+    )
+  ))
+
+
+pop_reached_summaries2 <- population_reached_data_pop2 %>% 
+  group_by(time, qn, my_label  ) %>% 
+  summarise(mean = mean(percent_population_reached),
+            median = median(percent_population_reached),
+            weighted_mean = weighted.mean(percent_population_reached, w = pop)) %>% 
+  ungroup() %>% 
+  pivot_longer(cols = -c(time, qn, my_label))
+
+
+ggplot() +
+  geom_line(data =population_reached_data_pop2%>%
+              mutate(my_label =reorder(my_label, as.numeric(qn)) ),
+            aes(x = time/60, y = percent_population_reached, group = id ),
+            alpha =.1) +
+  geom_line(data = pop_reached_summaries2 %>% 
+              mutate(my_label =reorder(my_label, as.numeric(qn)) ), 
+            aes(x = time/60, y = value, color = name ),
+            size = 2) +
+  facet_wrap(~my_label) +
+ ggthemes::scale_color_tableau() +
+ theme_minimal()+
+ scale_y_continuous(labels = scales::percent)+
+ labs(y = "percent population reached",
+     x = "travel time in minutes") +
+ theme(legend.position = "bottom")
+```

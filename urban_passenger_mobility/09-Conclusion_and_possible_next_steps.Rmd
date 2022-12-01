@@ -1,0 +1,56 @@
+
+# Concluding Remarks and possible ways forward for further development
+
+This use case showed the potential of using open-source and readily available GTFS data to compute access to public transport statistics. This was done in such a way that is should be possible to scale this to other European cities or Functional Urban Areas. To this extent, the code and the logic presented in this use-case proof of concept can be used by others to continue the work. It is worth noting that while the GTFS format is standardized and coherent, the use of the format by different public transport information providers is not. This means that it will inevitably be necessary to clean the data somewhat to make the code function. One common issue, for example, is that in the `transfers` file there are stop IDs that are not part of the stops file. This means that the OpenTripPlanner cannot be built.
+
+## Next Steps
+
+This use case has only shown the beginning of what is possible with GTFS data. However, all of the statistics computed here rely on static GTFS scheduling data. In a sense, these are all accessibility statistics (access to public transport) and not statistics on the use of public transport. The GTFS Realtime standard is not nearly as commonly adapted within the European Union as the GTFS scheduling standard. However, the roll-out of this standard offers opportunities to build further on the work presented here. The GTFS Realtime framework might offer a way to estimate actual public transport use statistic. GTFS Realtime provides real-time data of all the buses/trams/trains/etc. in a city. In addition to the current location (longitude and latitude) of a bus and the current bus stop it is serving, it also offers a field for the current occupancy rate of the bus.
+To use the GTFS Realtime data, you need the right Protocol Buffer template to be able to read the binary data: "Protocol buffers are Google's language-neutral, platform-neutral, extensible mechanism for serializing structured data."^[https://developers.google.com/protocol-buffers/]  Luckily the buffer protocol is ready to be used in Python (and many other languages, but not R). So, as an example, the Python code below shows how to load the current real-time GTFS data for the city of Rome and show the location of the 2nd bus in the dataset. 
+ 
+ 
+The occupancy status of a bus is not a required field in the current version of the GTFS Realtime framework, this means that it is up to public transport providers or local regulatory agencies to determine whether they choose to include this field or not.   See [here](https://digitransit.fi/en/developers/apis/4-realtime-api/vehicle-positions/) the link to the to GTFS Realtime protocol buffer stream of Helsinki and  [here](https://dati.comune.roma.it/catalog/dataset/c_h501-d-9000) tthe stream of Rome, as two examples. As more public transport providers publish real-time data in the GTFS Realtime format and include information on actual occupancy rates, this data can be used to further enrich the statistics presented here and give a better proxy of actual transport use statistics, instead of only accessibility statistics.
+
+
+```{python, eval = FALSE}
+from google.transit import gtfs_realtime_pb2
+import requests
+
+feed = gtfs_realtime_pb2.FeedMessage()
+# requests will fetch the results from a url, in this case, the positions of all Romes buses
+location = 'https://dati.comune.roma.it/catalog/dataset/a7dadb4a-66ae-4eff-8ded-a102064702ba/resource/d2b123d6-8d2d-4dee-9792-f535df3dc166/download/rome_vehicle_positions.pb'
+
+response =   requests.get(location)       
+feed.ParseFromString(response.content)
+
+bus = feed.entity[1]
+bus
+```
+
+```{python, eval = FALSE}
+id: "2"
+is_deleted: false
+vehicle {
+  trip {
+    trip_id: "0#935-8"
+    start_time: "20:03:00"
+    start_date: "20220502"
+    route_id: "115"
+    direction_id: 0
+  }
+  position {
+    latitude: 41.89421844482422
+    longitude: 12.460575103759766
+    odometer: 11242.0
+  }
+  current_stop_sequence: 7
+  current_status: IN_TRANSIT_TO
+  timestamp: 1651515194
+  stop_id: "72864"
+  vehicle {
+    id: "195"
+    label: "0244"
+  }
+}
+```
+

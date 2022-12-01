@@ -1,0 +1,43 @@
+docker run -dt --name ors-app2 -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-conf/ors-config -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=1 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+
+http://localhost:8080/ors/v2/directions/foot-walking?start=4.40897,50.838015&end=4.359946,50.86013
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e “CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-conf/ors-config.json  -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/brussels.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/brussels.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+
+docker run -dt --name ors-app2 -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+

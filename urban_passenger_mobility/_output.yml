@@ -1,0 +1,15 @@
+bookdown::gitbook:
+  css: style.css
+  config:
+    toc:
+      before: |
+        <li><a href="./">Using Open-source Data to Estimate Mobility Statistics</a></li>
+      after: |
+        <li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+    edit: https://github.com/rstudio/bookdown-demo/edit/master/%s
+    download: ["pdf", "epub"]
+bookdown::epub_book: default
+bookdown::bs4_book:
+  css: style.css
+  theme:
+    bootswatch: "flatly"

@@ -1,0 +1,48 @@
+# Setting Parameters
+
+
+To be able to run this project it is important to set some global parameters:
+
+
+1) `cleaned_data_folder`: This is the relative file path where the processed data will be saved
+2) `link_to_country_osm_file` : this is the URL where the relevant OSM map can be downloaded from
+3) `name_country_osm_file`: This is the file name of the downloaded OSM data (included relative path)
+4) `name_FUA_osm_file`: This is the name of the OSM file after it has been cropped to the right size using the `osmconvert` tool
+5) `urban_area_of_interest`: This the  Unique ID of the FUA of interest. In the FUA  shapefile every Functional Urban Area has an unique ID, named `URAU_CODE`. The unique URAU_CODE for The Hague is for example NL001L3.
+6) `path_to_shape_file`: This is the relative file path where the FUA shapefile is stored
+7) `name_layer`: This is the name of the specific layer of the FUA shapefile that is needed 
+8) `path_to_gtfs_file: This is the relative file path where the GTFS `.zip` file is stored
+9) `path_to_subset_gtfs_file:  This is the relative file path where the GTFS `.zip` file will be stored after it has been processed and cleaned
+10) `path_to_saved_elevation: This is the relative file path where the elevation data will be stored once downloaded by the `elevatr` package
+11) `start_date`: In order to clean the GTFS data and compute certain weekly statistics, you need to set an actual start date in the format YYYY-MM-DD. Usually this is the Monday of a given week.
+12) `end_date`: To clean the GTFS data and compute certain weekly statistics, you need to set an actual end date in the format YYYY-MM-DD. Usually this is the Sunday of a given week.
+13) `population_data_path`:  This is the file name of the downloaded population density data (included relative path)
+14) `name_OTP_folder`: This is the folder where all the files that are needed for OpenTripPlanner are saved
+15) `date_and_time`: To do the travel duration analyses you need to choose a time, because the same trip might take longer or shorter on different days. This project selected 0830 am on Tuesday morning, 17th May. You should be careful not to choose a public holiday or Sunday, as public transport schedules are different on these days
+16) `max_walking_distance`. To do any of the public transport analyses, you need to tell OpenTripPlanner the maximum walking distance to a public transport stop. This project uses 1,000m. Of course, if you set this number higher, a larger part of the city becomes accessible. In an extreme case, people could just walk everywhere and not use public transport at all.
+17) `output_population_reached`: This is the file name of the results of OpenTripPlanner isochrone (included relative path). This analysis takes a while to run, hence it makes sense to save the results in `.csv` format for later analysis
+18) `grid_size`: This parameter determines the distance between points (in longitude and latitude) on the grid for which the isochrones are computed. The smaller this number the more points
+
+
+
+```{r, eval=TRUE}
+cleaned_data_folder       <- "cleaned_data"
+link_to_country_osm_file  <- "https://download.geofabrik.de/europe/netherlands/zuid-holland-latest.osm.pbf"
+name_country_osm_file     <- "data/zuid-holland-latest.osm.pbf"
+name_FUA_osm_file         <- "thehague.osm.pbf"
+urban_area_of_interest    <- "NL001L3"
+path_to_shape_file        <- "data/URAU_RG_100K_2020_3857_FUA.shp/URAU_RG_100K_2020_3857_FUA.shp"
+name_layer                <- "URAU_RG_100K_2020_3857_FUA"
+path_to_gtfs_file         <- "data/gtfs-openov-nl.zip"
+path_to_subset_gtfs_file  <- "subset-gtfs_the_hague.zip"
+path_to_saved_elevation   <- "elevation_the_hague.tif"
+start_date                <- "2022-05-16"
+end_date                  <- "2022-05-22"
+population_data_path      <- "data/nld_ppp_2020_UNadj_constrained.tif"
+name_OTP_folder           <- "OTP_folder"
+date_and_time             <- as.POSIXct(strptime("2022-05-17 08:30", "%Y-%m-%d %H:%M", tz ="Europe/Amsterdam"))
+max_walking_distance      <- 1000
+output_population_reached <- "results/population_reached_data.csv"
+grid_size                 <- 0.005
+
+```

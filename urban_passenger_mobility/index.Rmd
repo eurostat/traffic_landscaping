@@ -1,0 +1,214 @@
+--- 
+title: "Using Open-source Data to Estimate Mobility Statistics"
+author: "Laurent Smeets"
+date: "`r Sys.Date()`"
+site: bookdown::bookdown_site
+output: bookdown::gitbook
+documentclass: book
+bibliography: [book.bib, packages.bib]
+biblio-style: apalike
+link-citations: yes
+github-repo: rstudio/bookdown-demo
+description: "This is a minimal example of using the bookdown package to write a book. The output format for this example is bookdown::gitbook."
+---
+
+
+
+# Background
+
+
+
+This proof of concept will guide the reader through a use case that was developed by Laurent Smeets, who is working for GOPA on a contract for the European Union named “Data Landscaping: Traffic and Mobility Data Sources for Official Statistics”. This use case will shows how to compute the following indicators can be computed for any Functional Urban Area or city within the European Union (if the relevant data is available).
+
+
+- Percentage of population that living within 500m of a public transport stop (straight-line-distance)
+- Percentage of population that living within 500m walk from a public transport stop
+- Percentage of population that living  within a 500m walk from a public transport stop that is serviced at least twice on workdays between 7 am and 9 am
+- Percentage of population that living within a 500m walk from a public transport stop that is wheelchair accessible
+- Percentage of population that can be reached within one hour from any given location in the city (weighted by population density)
+- Average time loss using public transport compared to using a car to get from any point in the city to another point, as the mean of the ratio of travel times between different points, where 1 means perfect parity.
+
+The code is set up in such a way that each of the specific parameters of these indicators can be changed relatively easily. The three plots below show examples of these statistics for 5 different capital cities in the EU.
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+library(plotly)
+library(dplyr)
+library(glue)
+library(tidyverse)
+library(lubridate)
+library(colorspace)
+
+
+data_ggp1 <- readRDS("large_file_storage/data_ggp1.rds")
+data_ggp2 <- readRDS("large_file_storage/data_ggp2.rds")
+data_ggp3 <- readRDS("large_file_storage/data_ggp3.rds")
+
+reverse_legend_labels <- function(plotly_plot) {
+  n_labels <- length(plotly_plot$x$data)
+  plotly_plot$x$data[1:n_labels] <- plotly_plot$x$data[n_labels:1]
+  plotly_plot
+}
+
+```
+
+
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE,  out.width="100%", out.height="750px", fig.cap="Public transport accessibility statistics for 5 capitals"}
+
+
+ggp2 <- data_ggp2%>% 
+  ggplot(aes(y = value,x = name, fill = city))+
+  geom_col(position = "dodge") +
+  coord_flip() +
+  theme_minimal()+
+  labs(x = NULL, y = "percent")+
+  scale_y_continuous(labels = scales::percent)+
+  ggthemes::scale_fill_colorblind( guide = guide_legend(reverse = TRUE) ) 
+  
+
+
+p2 <- plotly::ggplotly(ggp2, legend_traceorder="reversed")
+
+p2 %>% config(displayModeBar = FALSE) %>%
+  reverse_legend_labels()
+```
+
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE,  out.width="100%", out.height="500px", fig.cap="percentage of people that can be reached using public transport for at different time intervals. This plot shows both the mean, median and weighted mean (by population of starting point)"}
+
+ggp1 <- data_ggp1%>%
+  mutate(minutes = time/60,
+         percent =  round(value*100, 1)) %>% 
+  ggplot(aes(x = minutes, y = value, color = city,tooltip = percent)) +
+  geom_line( size = 1) +
+  facet_wrap(~name) +
+  theme_minimal()+
+  scale_y_continuous(labels = scales::percent)+
+  ggthemes::scale_color_colorblind() +
+  labs(y = NULL)
+
+  
+
+p1 <- plotly::ggplotly(ggp1, tooltip = "percent")
+
+p1 %>% layout(hovermode = "x unified") %>% config(displayModeBar = FALSE) %>%
+  reverse_legend_labels()
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE,  out.width="100%", out.height="500px", fig.cap="ratio of travel time public transport to car use for 5 different capitals. A value of 1 would indicate a perfect parityparirity of travel time by public transport and private car use and a value of larger than 1 means that expected public transport time is longer than car use."}
+
+ggp3 <- data_ggp3 %>% 
+  ggplot(aes(y = value,x = name, fill = city))+
+  geom_col(position = "dodge") +
+  coord_flip() +
+  theme_minimal()+
+  labs(x = NULL, y = "ratio")+
+  ggthemes::scale_fill_colorblind( guide = guide_legend(reverse = TRUE) ) 
+
+
+p3 <- plotly::ggplotly(ggp3, legend_traceorder="reversed")
+
+p3 %>% config(displayModeBar = FALSE) %>%
+  reverse_legend_labels()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+## Outlining the problem
+
+Urban passenger mobility is usually defined as all trips, shorter than 100km, made by residents of an urban area, where both origin and destination are inside the same urban area.^[Definition from: https://ec.europa.eu/eurostat/statistics-explained/index.php?title=Passenger_mobility_statistics]  This includes all commuting trips of residents who work and life in the same urban area, trips made for pleasure, and trips made for any other purpose, by any means of transport. Last year, the European Commission launched a new Urban Mobility Framework that aimed to improve urban transport systems in order to make them safe, accessible, inclusive, affordable, smart, resilient, and emission-free, with a focus on active mobility (walking, cycling). However, it is not trivial to estimate the statistical data related to this urban mobility.^[https://ec.europa.eu/commission/presscorner/detail/en/qanda_21_6729]
+
+
+To be able to measure and plan the different types of urban mobility, statistical agencies, including Eurostat, have an interest in estimating a wide range of statistics around urban mobility, especially since more and more journeys are made within cities. Some of these statistics can be derived from administrative data or city planning data. Examples include some of the Sustainable Urban Mobility Indicators (SUMI)  indicators^[https://transport.ec.europa.eu/transport-themes/clean-transport-urban-transport/sumi_en]  (e.g. Indicator 10: Opportunity for Active Mobility indicator; the length of roads and streets with pavements, cycle lanes, 30 km/h (20 mp/h) zones and pedestrian zones in relation to the total length of the urban road network (excluding motorways)). Others have to be derived from surveys already regularly conducted by Eurostat (e.g. Indicator 12: Satisfaction with public transport indicator; the average reported satisfaction with moving in the urban area by public transport). However, other indicators are less harmonised at European level. In particular, statistics on transport mode use and travel time are currently not collected in a harmonised way. A recent fact-finding study commissioned by the EU found that  *“Although 90% of all sampled cities declared that they are routinely collecting some kind of urban mobility-related data, the availability of up-to-date and quality data varies considerably across cities. The most common reasons for this include data being held by many different departments, agencies, companies and the difficulty to compile the data in one place, lack of staff to collect, compile and analyse data, and the costs related to the collection of purchase of data. This is especially true for smaller cities.”*^[[FACT-FINDING STUDY ON STATUS AND FUTURE NEEDS REGARDING LOW- AND ZEROEMISSION URBAN MOBILITY](https://transport.ec.europa.eu/system/files/2021-12/isbn-978-92-76-45410-6-fact-finding-study-on-status-and-future-needs-regarding-low-and-zero-emission-urban-mobility-executive-summary.pdf) ]
+
+Eurostat has published a set of guidelines on the harmonisation of mobility statistics, but in most cases, they require the use of mobility surveys .^[[EU Transport Statistics
+Eurostat guidelines on Passenger Mobility Statistics](https://ec.europa.eu/eurostat/documents/29567/3217334/Guidelines_on_Passenger_Mobility_Statistics+%282018_edition%29.pdf/f15955e3-d7b4-353b-7530-34c6c94d2ec1?t=1611654879518)]  TThese traditional methods of mobility data collection -most commonly self-report diary-based  surveys- often do not suffice to collect relevant data. They are likely to be generalisable only at a national level, are expensive to conduct at timely intervals and suffer from both respondent fatigue and recollection bias (most notably, a likely underreporting of short trips).^[Akshay Vij and Kalyanaraman Shankari. *“When is big data big enough? Implications of using GPS-based surveys for travel demand analysis”*. In: Transportation Research Part C: Emerging Technologies 56 (2015) and Hamid Safi, Behrang Assemi, Mahmoud Mesbah, and Luis Ferreira. *“An empirical comparison of four technology-mediated travel survey methods”*. In: Journal of traffic and transportation engineering (English edition) 4.1 (2017), pp. 80–87]
+
+While so-called smart surveys do indeed have the potential to resolve some problems related to traditional survey methods, they are still expensive to roll out and conducted at irregular intervals. Notwithstanding, I believe that there are Urban Mobility statistics that can be estimated by just using currently available data and opensource methods.
+
+As explained above, this proof of concept will focus on three statistics in particular
+
+1) Sustainable Development Indicator (SDG) Target 11.2.1. This is a United Nation SDG indicator under SDG goal 11 (**Goal 11. Make cities and human settlements inclusive, safe, resilient and sustainable**) and reads: **"Proportion of population that has convenient access to public transport, by sex, age and persons with disabilities"**
+2) What percentage of the urban area can be reached using public transport within a certain time period.
+3)	What is the average time lost by using public transport instead of a private car to travel between any two locations in an urban area?
+
+
+
+While there are many and clear limitations to the methods explained here (see also Chapter \@ref(limitations)),the advantages of these methods and the reasons for their selection are as follows:
+
+
+1) **Scalable**: this means that once access and the data pipeline are set up the product can be scaled across different urban centres in the EU. This means that one-of data sources that might only be available in a few urban centers are not integrated
+2) **Passive**: all proposed data sources are so-called passive data sources. They are collected as meta-data from other data sources as passive crowd-sourced data. This means that no interaction with the respondents providing the data is required.
+3) **Close to real-time**: the proposed data sources allow the production of mobility statistics in near real-time.
+4) **Easy update**:  : the proposed data sources allow for timely updating of mobility statistics. Without much effort, mobility statistics can be updated on a daily, weekly, or monthly basis.
+5) **Geospatial**: all data sources are geospatial in nature.
+6) **(semi)-structured data**: all proposed data sources are semi-structured data sources that use APIs to retrieve the data. This facilitates the easy and timely generation of statistics. This means that data from unstructured data sources, such as traffic cameras, which require more custom pre-processing to produce mobility statistics, are not considered. While there is real potential for e.g. using traffic camerass^[see for example [Estimating vehicle and pedestrian activity from town and city traffic cameras](https://datasciencecampus.ons.gov.uk/projects/estimating-vehicle-and-pedestrian-activity-from-town-and-city-traffic-cameras/)]to estimate cyclist or pedestrian traffic, the data requires extensive processing and is unlikely to scale easily between cities as there are different types of cameras and recording setups in different urban areas.
+7) **Opensource and free to access:** Somewhat self-explanatory. The fact that all data sources specified here are freely accessible facilitates their scaling and implementation.
+
+
+## On Why Google Maps Wasn't Used
+
+
+
+While Google offers a user-friendly method to derive certain access-to-mobility statistics and potential proxies for mobility use via crowd-sourced user data, it also comes with two potential disadvantages. 
+
+1) It is not free to use. While users get a certain amount of free Google Credit, the API is not free to use.^[The current and exact costing of the use of the Google Distance Matrix API is explained on https://developers.google.com/maps/documentation/distance-matrix/usage-and-billing]. However, as an estimation, the cost per Origin-Destination pair is 0.005 USD for public transport, walking and cycling and 0.010 USD for driving. So, for a theoretical use-case with 33 origins/destinations, with 3 modes of transport (public transport, driving and cycling) for one day every half an hour between 4 am and midnight would be:
+
+
+
+$$ 
+33 \times (33-1) \times 20 \times 2= 43,560
+$$
+
+$$
+(43.560 \times 0.005 \times 2) + (43.560 \times 0.010) = 653.4 \text{USD}.
+$$
+
+
+2) 2)	It is not completely clear to the author whether using the API and reporting results from the API without explicit consent from Google is covered under the current Terms of Service.^[https://cloud.google.com/maps-platform/terms] Consider these passages from the Google Terms of Service:
+
+**3.2.3 Restrictions Against Misusing the Services.**
+
+*(a)  No Scraping. Customer will not export, extract, or otherwise scrape Google Maps Content for use outside the Services. For example, Customer will not: (i) pre-fetch, index, store, reshare, or rehost Google Maps Content outside the services; (ii) bulk download Google Maps tiles, Street View images, geocodes, directions, distance matrix results, roads information, places information, elevation values, and time zone details; (iii) copy and save business names, addresses, or user reviews; or (iv) use Google Maps Content with text-to-speech services.*
+
+*(b) No Caching. Customer will not cache Google Maps Content except as expressly permitted under the Maps Service Specific Terms*.
+
+*(c) No Creating Content From Google Maps Content. Customer will not create content based on Google Maps Content. For example, Customer will not: (i) trace or digitize roadways, building outlines, utility posts, or electrical lines from the Maps JavaScript API Satellite base map type; (ii) create 3D building models from 45° Imagery from Maps JavaScript API; (iii) build terrain models based on elevation values from the Elevation API; (iv) use latitude/longitude values from the Places API as an input for point-in-polygon analysis; (v) construct an index of tree locations within a city from Street View imagery; or (vi) convert text-based driving times into synthesized speech results.”*
+
+
+and
+
+
+**3.2.4 Benchmarking.**
+
+*Customer may not publicly disclose directly or through a third party the results of any comparative or compatibility testing, benchmarking, or evaluation of the Services (each, a “Test”), unless the disclosure includes all information necessary for Google or a third party to replicate the Test. If Customer conducts, or directs a third party to conduct, a Test of the Services and publicly discloses the results directly or through a third party, then Google (or a Google directed third party) may conduct Tests of any publicly available cloud products or services provided by Customer and publicly disclose the results of any such Test (which disclosure will include all information necessary for Customer or a third party to replicate the Test).*
+
+
+Fortunately, there are Open-Source alternatives that have less restrictive terms of service. Examples include OpenrouteService and OpenTripPlanner. These services allow you to download an OpenStreetmaps map and enrich it with General Transit Feed Specification (GTFS) data and even elevation data to build a local routing service. This comes at the advantage of being free, without restrictive terms of use, locally hosted and flexible. However, it comes at the price of not having the crowd-sourced data aspect Google Maps offers.
+
+
+```{r include=FALSE}
+# automatically create a bib database for R packages
+knitr::write_bib(c(
+  .packages(), 'bookdown', 'knitr', 'rmarkdown'
+), 'packages.bib')
+
+#from output
+# bookdown::pdf_book:
+#   includes:
+#     in_header: preamble.tex
+#   latex_engine: xelatex
+#   citation_package: natbib
+#   keep_tex: yes
+```

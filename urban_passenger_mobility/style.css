@@ -1,0 +1,44 @@
+p.caption {
+  color: #777;
+  margin-top: 10px;
+}
+p code {
+  white-space: inherit;
+}
+pre {
+  word-break: normal;
+  word-wrap: normal;
+}
+pre code {
+  white-space: inherit;
+}
+
+.bg-primary {
+    background-color: #6c757d!important;
+    color: #fff;
+}
+
+
+
+
+@media (min-width: 1200px) {
+  .container-fluid {
+    max-width: 150rem!important;
+  }
+  .container-fluid .row {
+    justify-content: space-evenly;
+  }
+  .container-fluid main {
+    max-width: 75rem!important;
+  }
+  .sidebar {
+    max-width: 15rem;
+  }
+
+  /* Increase font-size for very wide devices */
+  body {
+    font-size: 18px
+  }
+}
+
+

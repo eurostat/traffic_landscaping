@@ -1,0 +1,1 @@
+This folder holds all to code for the computation of the urban mobility statistics. An interactive bookdown version of this code can be found on: https://code-documentation-urban-mobiliy.netlify.app/

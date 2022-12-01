@@ -1,0 +1,116 @@
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+## this still wokrks 
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/01_Austria/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/02_Belgium/belgium-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+
+## does not work for foot
+docker run -dt --name ors-app2 -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf.json -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/03_Croatia/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf -v C:/Users/laure/stack/Gopa/usecase_OTP_Project/03_Croatia/current_capital_file.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" giscience/openrouteservice:release-6.6.0
+
+
+/conf:/ors-conf
+
+
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+####
+
+test case
+
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#####
+I, like many people new to ORS, am using this tutorial https://sites.google.com/view/dipayan-banerjee/local-openrouteservice-setup-windows-10-home to set up an ORS docker container. This works fine for me, if I want to use car as the transport mode, but fails if I want to use walking as the transport mode.  Based on this forum entry https://ask.openrouteservice.org/t/no-ors-config-json-in-ors-conf-folder-docker/3050. I downloaded ors-config.json (from here: https://github.com/GIScience/openrouteservice/blob/master/openrouteservice/src/main/resources/ors-config-sample.json) file and put it in a folder named "C:/ors-conf" and north-dakota-latest.osm.pbf in  "C:/OSMFiles" I then use this command:
+
+```
+docker run -dt --name ors-app2 -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:v6.7.0
+
+
+If I then run this command in my browser: "http://localhost:8080/ors/v2/directions/driving-car?start=-96.7940189,46.9030355&end=-96.7875133,46.9022436", it works fine. however, when I run  "http://localhost:8080/ors/v2/directions/foot-walking?start=-96.7940189,46.9030355&end=-96.7875133,46.9022436" I get this error message `{"error":{"code":2099,"message":"Unable to get an appropriate route profile for RoutePreference = foot-walking"},"info":{"engine":{"version":"6.6.0","build_date":"2022-08-15T09:17:31Z"},"timestamp":1660555687678}}`
+
+If I then try to build the docker like this instead, linking to the ors-config.json file I still get the same error
+
+```
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice:v6.6.0
+
+```
+
+
+
+###
+
+I, like many people new to ORS, am using this tutorial https://sites.google.com/view/dipayan-banerjee/local-openrouteservice-setup-windows-10-home to set up an ORS docker container. For the actual product I will run querries via the openrouteservice r package. This works fine for me, if I run an older version of ORS (6.6.0 or below), but then I cannot seem to access the 'foot-walking' profile and only the 'car-driving' profile. If I use the latest version of openrouteservice, like this
+```
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v /var/lib/docker/conf:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+```
+ or like this ( Based on this forum entry https://ask.openrouteservice.org/t/no-ors-config-json-in-ors-conf-folder-docker/3050, I downloaded ors-config.json from here: https://github.com/GIScience/openrouteservice/blob/master/openrouteservice/src/main/resources/ors-config-sample.json file and put it in a folder named "C:/ors-conf")
+
+```
+docker run -dt --name ors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+
+```
+
+I get  this error message at the top of the log when running the command.
+
+```
+rm: cannot remove '/ors-core/data/graphs/car': Permission denied
+
+### openrouteservice configuration ###
+
+No ors-config.json in ors-conf folder. Copy config from /ors-core/openrouteservice/src/main/resources/ors-config.json
+
+cp: cannot create regular file '/ors-conf/ors-config.json': Permission denied
+
+### Package openrouteservice and deploy to Tomcat ###
+```
+
+or this error message
+
+
+```
+rm: cannot remove '/ors-core/data/graphs/car': Permission denied
+
+### openrouteservice configuration ###
+
+ors-config.json exists in ors-conf folder. Copy config to /ors-core/openrouteservice/src/main/resources/ors-config.json
+
+### Package openrouteservice and deploy to Tomcat ###
+```
+
+
+What can I do to prevent this from happening and give the right permissions? I have tried running as admin, reinstalling everything, but nothing seems to make a difference.
+
+If i run the command like
+
+```
+docker run -dt --name myors-app -p 8080:8080 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v /var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-config:/ors-conf -v C:/OSMFiles/north-dakota-latest.osm.pbf:/ors-core/data/osm_file.pbf -e "JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e "CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost" openrouteservice/openrouteservice:latest
+```
+
+it does work, but only for cars and not walking
+
+
+
+

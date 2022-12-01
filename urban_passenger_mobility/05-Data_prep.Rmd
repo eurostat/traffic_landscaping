@@ -1,0 +1,322 @@
+# Data preparation and cleaning
+
+```{r, echo=FALSE, eval=TRUE, warning=FALSE, message=FALSE}
+library(webshot)
+
+library(sf)
+library(dplyr)
+library(glue)
+library(gtfstools)
+library(tidyverse)
+library(lubridate)
+library(colorspace)
+library(terra)
+library(opentripplanner) 
+library(gtfs2gps)
+library(elevatr)
+library(terra)
+library(stringi)
+library(openrouteservice)
+library(sf)
+
+name_OTP_folder           <- "OTP_folder"
+```
+
+
+
+With all the data downloaded and the software installed, we can now start to process this data.
+
+## Crop OSM map
+
+First, we crop the OSM data file to the right size 
+
+```{r, eval = FALSE}
+# load shapefile
+FUA_shape_file <- read_sf(path_to_shape_file, layer= name_layer) 
+
+# select FUA
+city_shape_file <- FUA_shape_file %>%
+  filter(URAU_CODE  == urban_area_of_interest)
+
+# reproject city shapefile to longlat
+city_shape_file <- st_transform(city_shape_file, st_crs("+proj=longlat"))
+
+# extract bounding box of shapefile
+bbox_FUA <- round(st_bbox(city_shape_file) *100)/ 100
+
+# create osmconvert string command
+cutting_command <-
+  glue(
+    "osmconvert64-0.8.8p.exe {name_country_osm_file} -b={bbox_FUA$xmin -0.02},{bbox_FUA$ymin -0.02},{bbox_FUA$xmax +0.02},{bbox_FUA$ymax +0.02}  --complete-ways --out-pbf -o={file.path(cleaned_data_folder,name_FUA_osm_file)}"
+  )
+
+# run osmconvert string command  command tool to snap just the city of the hague shapefile
+system(cutting_command)
+```
+
+## Crop and Clean GTFS data
+
+In a second step, we need to clean up the GTFS data. OpenTripPlanner is somewhat picky about the way the GTFS data is formatted and by default, the Dutch GTFS data does not match these requirements. Fortunately, the `gtfs2gps` package has some tools that can help with formatting the data in the right format. For example, it is paramount that the stop time of a stop is after the beginning of a stop and that neither the arrival time, nor the departure time is missing, the `filter_valid_stop_times()` function will help you to select only the correct stop.
+
+To speed up OpenTripPlanner, it helps to make the GTFS file as small as possible (while still covering the whole Urban Area). This is where we can use the shapefile of the FUA again.
+
+```{r, eval = FALSE}
+# Load GTFS file
+full_gtfs_file <- gtfs2gps::read_gtfs(path_to_gtfs_file)
+
+# Filter only the stops that are in the actual FUA
+current_UA_stops <- full_gtfs_file$stops%>%
+  st_as_sf(coords = c("stop_lon", "stop_lat")) %>%
+  st_set_crs(st_crs("+proj=longlat"))%>%
+  mutate(point_in = as.numeric(st_intersects(., city_shape_file))) %>%
+  filter(!is.na(point_in)) %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2]) 
+
+# Filter only the stop times of the stops that are within the FUA
+current_UA_stoptimes <- full_gtfs_file$stop_times %>% 
+  filter(stop_id  %in% unique(current_UA_stops$stop_id))
+
+# Filter only trips that go by the stops that are within the FUA
+current_UA_trips <- full_gtfs_file$trips%>% 
+  filter(trip_id   %in% unique(current_UA_stoptimes$trip_id ))
+
+# Filter only routes that go by the stops that are within the FUA
+routes_of_interest <- full_gtfs_file$routes %>% 
+  filter(route_id    %in% unique(current_UA_trips$route_id  )) %>% 
+  pull(route_id ) %>% 
+  unique()
+
+# subset the whole GTFS file
+subset_gtfs_file <- gtfs2gps::filter_by_route_id(full_gtfs_file, routes_of_interest)
+
+# Filter only the stops that are in the actual FUA
+# needs to happen again after the filtering of the routes
+subset_UA_stops <- subset_gtfs_file$stops%>%
+  st_as_sf(coords = c("stop_lon", "stop_lat")) %>%
+  st_set_crs(st_crs("+proj=longlat"))%>%
+  mutate(point_in = as.numeric(st_intersects(., city_shape_file))) %>%
+  filter(!is.na(point_in)) %>%
+  dplyr::mutate(lon = sf::st_coordinates(.)[,1],
+                lat = sf::st_coordinates(.)[,2]) 
+
+# Filter only the stop times of the stops that are within the FUA
+subset_UA_stoptimes <- subset_gtfs_file$stop_times %>% 
+  filter(stop_id  %in% unique(subset_UA_stops$stop_id))
+
+# Filter out invalid stops
+subset_gtfs_file <- gtfs2gps::remove_invalid(subset_gtfs_file)
+subset_gtfs_file <- gtfs2gps::filter_valid_stop_times(subset_gtfs_file)
+
+# save the subsetted GTFS file.
+gtfs2gps::write_gtfs(subset_gtfs_file, file.path(cleaned_data_folder,path_to_subset_gtfs_file))
+```
+
+```{r,echo=FALSE, fig.cap = 'All GTFS routes of the Netherlands',out.width="100%"}
+knitr::include_graphics("images/full_shape_p1.png")
+```
+
+
+
+The original full GTFS routing data for the Netherlands looked like this:
+
+```{r, eval=FALSE}
+full_shape <- full_gtfs_file$shapes
+
+ggplot(full_shape) +
+  geom_sf(data = city_shape_file, fill = "red", alpha = .5) +
+  geom_path(aes(shape_pt_lon, 
+                shape_pt_lat,
+                group = shape_id), color="white", size=.2, alpha=.05) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black", colour = "black"),
+        axis.title.x = element_blank())
+```
+
+While the filtered data is much smaller and looks like this:
+
+```{r,echo=FALSE, fig.cap = 'Filtered GTFS routes for just The Hague',out.width="100%"}
+knitr::include_graphics("images/subset_shape_p1.png")
+```
+
+
+
+```{r, eval=FALSE}
+subset_shape <- subset_gtfs_file$shapes
+
+ggplot(subset_shape) +
+  geom_sf(data = city_shape_file, fill = "red", alpha = .5) +
+  geom_path(aes(shape_pt_lon,
+                shape_pt_lat,
+                group = shape_id), color="white", size=.2, alpha=.05) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black", colour = "black"),
+        axis.title.x = element_blank())
+```
+
+
+
+Note that there are still routes that are outside The Hague. These are train routes that start outside the city, but have more than one stop within the FUA, which means that they can be used for public transport within the FUA. Plotting all stops within the city and zooming in would look like this:
+
+```{r, eval=FALSE}
+ggplot(subset_shape) +
+  geom_sf(data = city_shape_file, fill = "red", alpha = .5) +
+  coord_sf(xlim = c(4.1, 4.6), ylim = c(51.9, 52.2))+
+  geom_path(aes(shape_pt_lon, shape_pt_lat, group=shape_id), color="white", size=.5, alpha=.05) +
+  geom_point(data = current_UA_stops, aes(lon, lat), color="white", fill = "white", size = 1, alpha=.2) +
+  theme_void() +
+  theme(plot.background = element_rect(fill = "black", colour = "black"),
+        title = element_text(hjust=1, colour="white", size = 8),
+        axis.title.x = element_blank())
+
+```
+
+```{r,echo=FALSE, fig.cap = 'Filtered GTFS stops for just The Hague',out.width="100%"}
+knitr::include_graphics("images/subset_shape_p2.png")
+```
+
+
+## Set up OpenTripPlanner
+
+
+### Set up folder structure
+
+Now it is time to set up the OpenTripPlanner. To do so it is important that all the files are moved into the correct folder structure. This structure will look something like this
+
+
+
+```{bash , eval=FALSE}
+.
+└── OTP_folder
+    └── graphs
+        └── default
+            ├── elevation.tif
+            ├── gtfs.zip
+            └── osm_file.osm.pbf
+```
+
+To create this structure and move the files in the right folders we can use this code:
+
+
+```{r , eval=FALSE}
+# set top level folder
+path_data <- file.path(name_OTP_folder)
+
+# create subfolders
+ifelse(!dir.exists(path_data), dir.create(path_data), FALSE)
+ifelse(!dir.exists( file.path(name_OTP_folder, "graphs")), 
+       dir.create( file.path(name_OTP_folder, "graphs")), FALSE)
+
+
+ifelse(!dir.exists( file.path(name_OTP_folder,  "graphs", "default")), 
+       dir.create( file.path(name_OTP_folder,  "graphs",  "default")), FALSE)
+
+# copy files into a subfolder and rename them
+file.copy(file.path(cleaned_data_folder, name_FUA_osm_file),
+          file.path(name_OTP_folder,
+                    "graphs", "default"))
+
+file.rename(from = file.path(name_OTP_folder,
+                             "graphs", "default", name_FUA_osm_file),
+            to   = file.path(name_OTP_folder, 
+                             "graphs", "default", "osm_file.osm.pbf"))
+
+
+file.copy(file.path(cleaned_data_folder, path_to_subset_gtfs_file),
+          file.path(name_OTP_folder,
+                    "graphs", "default"))
+
+file.rename(from = file.path(name_OTP_folder, 
+                             "graphs", "default", path_to_subset_gtfs_file),
+            to   = file.path(name_OTP_folder, 
+                             "graphs", "default", "gtfs.zip"))
+
+
+file.copy(file.path(cleaned_data_folder, path_to_saved_elevation),
+          file.path(name_OTP_folder,  "graphs", "default"))
+
+file.rename(from = file.path(name_OTP_folder,  "graphs", "default", path_to_saved_elevation),
+            to   = file.path(name_OTP_folder,  "graphs", "default", "elevation.tif"))
+```
+
+
+
+
+### Start OTP
+
+To start OTP, we first need to check if we have the right version of Java installed
+
+```{r, eval=FALSE}
+otp_check_java()
+```
+
+```{r, eval=FALSE}
+You have the correct version of Java for OTP 1.x
+[1] TRUE
+```
+
+
+If this is the case, we can start building the OTP Java programme, which we will use for the routing algorithm.
+
+```{r, eval=FALSE}
+path_otp <- otp_dl_jar(path_data, cache = TRUE)
+log1 <- otp_build_graph(otp = path_otp, dir = path_data,  memory = 8000)
+log2 <- otp_setup(otp = path_otp, dir = path_data)
+otpcon <- otp_connect(timezone = "Europe/Amsterdam")
+```
+
+if you are successful, R will give you a message that looks something like this:
+
+```{r, eval=FALSE}
+2022-07-03 17:52:07 OTP is loading and may take a while to be useable
+Router http://localhost:8080/otp/routers/default exists
+2022-07-03 17:52:38 OTP is ready to use Go to localhost:8080 in your browser to view the OTP
+```
+
+It will then create a `Graph.obj` file and the file structure will look like
+
+```{bash, eval=FALSE}
+.
+└── OTP_folder
+    └── graphs
+        └── default
+            ├── elevation.tif
+            ├── gtfs.zip
+            ├── Graph.obj
+            └── osm_file.osm.pbf
+```
+
+
+## OpenRouteService
+
+
+nce you have correctly installed the right docker container and it is working, you need to create the correct docker image, using a command like this. You will have to specify the location of the OpenStreetmap File (`osm.pbf`). Here I have named it `thehague.osm.pbf` (same as the `name_FUA_osm_file` file) and put it in a folder named OSMFiles on my C drive. Instead of the default 8080 port, I specify the 8081 port here, because OTP is already running on the 8080 port.
+
+```{bash, eval=FALSE}
+docker run -dt --name ors-app -p 8081:8081 -e BUILD_GRAPHS=True -v /var/lib/docker/graphs:/ors-core/data/graphs -v
+/var/lib/docker/elevation_cache:/ors-core/data/elevation_cache -v C:/ors-conf:/ors-config.json -v 
+C:/OSMFiles/thehague.osm.pbf:/ors-core/data/osm_file.pbf -e 
+"JAVA_OPTS=-Djava.awt.headless=true -server -XX:TargetSurvivorRatio=75 -XX:SurvivorRatio=64 -XX:MaxTenuringThreshold=3 -XX:+UseG1GC -XX:ParallelGCThreads=4 -Xms1g -Xmx2g" -e 
+"CATALINA_OPTS=-Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9001 -Dcom.sun.management.jmxremote.rmi.port=9001
+-Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=localhost"
+openrouteservice/openrouteservice:latest
+```
+
+Now to connect this Docker container to R I use the `openrouteservice` package.
+
+
+```{r, eval=FALSE}
+options(openrouteservice.url = "http://localhost:8080/ors")
+options(openrouteservice.paths = list(directions = "v2/directions",
+                                      isochrones = "v2/isochrones",
+                                      matrix = "v2/matrix",
+                                      geocode = "geocode",
+                                      pois = "pois",
+                                      elevation = "elevation",
+                                      optimization = "optimization"))
+```
+
+
+
+Everything is now ready to be used.
+

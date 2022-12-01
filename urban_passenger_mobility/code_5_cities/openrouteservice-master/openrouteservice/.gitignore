@@ -1,0 +1,13 @@
+target/
+*~
+TODO.txt
+.settings/
+.classpath
+.project
+#/WebContent/WEB-INF/ors-config.json
+*.iws
+*.ipr
+cgiar-cache
+srtm_38_03.zip
+logs/
+.attach_*

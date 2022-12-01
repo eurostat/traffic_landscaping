@@ -1,4 +1,4 @@
-Crop OSM map:
+# Crop OSM map:
 
 # load shapefile
 FUA_shape_file <- read_sf(path_to_shape_file, layer= name_layer) 
@@ -24,7 +24,7 @@ system(cutting_command)
 
 
 
-Crop and Clean GTFS data:
+# Crop and Clean GTFS data:
 
 # Load GTFS file
 full_gtfs_file <- gtfs2gps::read_gtfs(path_to_gtfs_file)
@@ -78,7 +78,7 @@ gtfs2gps::write_gtfs(subset_gtfs_file, file.path(cleaned_data_folder,path_to_sub
 
 
 
-original GTFS routing data:
+# original GTFS routing data:
 
 full_shape <- full_gtfs_file$shapes
 
@@ -92,7 +92,7 @@ ggplot(full_shape) +
         axis.title.x = element_blank())
 
 
-filtered data:
+# filtered data:
 
 subset_shape <- subset_gtfs_file$shapes
 
@@ -107,7 +107,7 @@ ggplot(subset_shape) +
 
 
 
-rroutes inside which lead outside (like trains)
+# rroutes inside which lead outside (like trains)
 
 ggplot(subset_shape) +
   geom_sf(data = city_shape_file, fill = "red", alpha = .5) +
@@ -121,17 +121,17 @@ ggplot(subset_shape) +
 
 
 
-Folder structure:
+# Folder structure:
+# 
+# .
+# └── OTP_folder
+#     └── graphs
+#         └── default
+#             ├── elevation.tif
+#             ├── gtfs.zip
+#             └── osm_file.osm.pbf
 
-.
-└── OTP_folder
-    └── graphs
-        └── default
-            ├── elevation.tif
-            ├── gtfs.zip
-            └── osm_file.osm.pbf
-
-code of Folder structure:
+# code of Folder structure:
 
 # set top level folder
 path_data <- file.path(name_OTP_folder)
@@ -173,7 +173,7 @@ file.rename(from = file.path(name_OTP_folder,  "graphs", "default", path_to_save
             to   = file.path(name_OTP_folder,  "graphs", "default", "elevation.tif"))
 
 
-Start OTP:
+# Start OTP:
 
 otp_check_java()
 
@@ -183,7 +183,7 @@ log2 <- otp_setup(otp = path_otp, dir = path_data)
 otpcon <- otp_connect(timezone = "Europe/Amsterdam")
 
 
-Connection Docker container to R:
+# Connection Docker container to R:
 
 options(openrouteservice.url = "http://localhost:8080/ors")
 options(openrouteservice.paths = list(directions = "v2/directions",

@@ -1,4 +1,4 @@
-Create Grid:
+# Create Grid:
 
 bounding_box <- st_bbox(city_shape_file) 
 
@@ -26,14 +26,14 @@ ggplot()+
 
 
 
-Percentage of population reached:
+# Percentage of population reached:
 
 total_pop <-  sum(as.matrix(terra::mask(population_data_city, vect(city_shape_file))),  na.rm = TRUE)
 total_pop
 
 
 
-Population reached for a given isochrone
+# Population reached for a given isochrone
 
 get_percentage_function <- function(y,
                                     data = complete_isochone,
@@ -53,7 +53,7 @@ get_percentage_function <- function(y,
 
 
 
-24 isochrones for all points and compute for all these isochrones what percentage of the population is reached:
+# 24 isochrones for all points and compute for all these isochrones what percentage of the population is reached:
 
 # create empty list to store results
 list_results <- list()
@@ -124,7 +124,7 @@ population_reached_data %>%
 
 
 
-How much of the population can be reached on average
+# How much of the population can be reached on average
 
 my_vor <- st_as_sf(terra::voronoi(terra::vect(grid))) %>% 
   st_intersection(city_shape_file)
@@ -145,7 +145,7 @@ mapview::mapview(my_vor,
 
 
 
-The mean, the median and the weighted mean for each time:
+# The mean, the median and the weighted mean for each time:
 
 population_reached_data_pop <- population_reached_data %>% 
   left_join(my_vor %>% 
@@ -180,7 +180,7 @@ ggplot() +
 
 
 
-Table format: 
+# Table format: 
 
  pop_reached_summaries %>% 
     mutate(value = paste0(format(round(value*100, 2), nsmall = 1), "%")) %>% 
@@ -192,7 +192,7 @@ Table format:
 
 
 
-Splitting the plot into 9 facets:
+# Splitting the plot into 9 facets:
 
 # to make the labels more human readable we can use this function
 # taken from https://stackoverflow.com/questions/28159936/format-numbers-with-million-m-and-billion-b-suffixes

@@ -1,4 +1,4 @@
-Using a radius: 
+# Using a radius: 
 
 # load stops
 all_stops <- subset_gtfs_file$stops %>%
@@ -19,7 +19,7 @@ round(sum(raster::extract(population_data_city_brick,
 
 
 
-500m distance:
+# 500m distance:
 
 # set up a datafram with just the lng/lat over every stop
 all_stops_simple <- all_stops %>%
@@ -69,7 +69,7 @@ round(sum(raster::extract(population_data_city_brick,
 
 
 
-Restrictions:
+# Restrictions:
 
 trips_for_stop <- subset_gtfs_file$stop_times %>%
   filter(stop_id %in% c(my_stop_id))
@@ -219,7 +219,7 @@ round(sum(raster::extract(population_data_city_brick,
 
 
 
-Wheelchair accessible stops:
+# Wheelchair accessible stops:
 
 # filter for only stops that are wheelchair accessible
 selected_stop_ids_wheelchair <- all_stops %>% 
